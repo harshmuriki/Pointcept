@@ -38,7 +38,7 @@ model = dict(
 )
 
 # scheduler settings
-epoch = 300  # Fewer epochs for smaller dataset
+eval_epoch = epoch = 300  # Reduced epochs for smaller dataset
 optimizer = dict(type="AdamW", lr=0.003, weight_decay=0.02)  # Slightly lower learning rate
 scheduler = dict(
     type="OneCycleLR",

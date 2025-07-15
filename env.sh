@@ -22,7 +22,11 @@ pip install torchmetrics
 
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.6.0+cu126.html
 pip install spconv-cu120
-pip install sharedarray tensorboard tensorboardx wandb yapf addict einops scipy plyfile termcolor timm
+pip install sharedarray tensorboard tensorboardx wandb yapf addict einops scipy plyfile termcolor timm wheel
+pip install flash-attn --no-build-isolation
+
+pip install git+https://github.com/openai/CLIP.git
+
 cd Pointcept/libs/pointops
 python setup.py install
 
