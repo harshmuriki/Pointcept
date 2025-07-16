@@ -6,13 +6,13 @@ Binary segmentation for peach tree pruning (keep vs prune) with tree type classi
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 8  # bs: total bs in all gpus (reduced for smaller dataset)
-num_worker = 16  # reduced workers for smaller dataset
+batch_size = 4  # Reduced batch size to help with debugging
+num_worker = 8  # Reduced workers to help with debugging
 mix_prob = 0.8
 empty_cache = False
-enable_amp = True
+enable_amp = False  # Disable AMP for easier debugging
 find_unused_parameters = True
-clip_grad = 3.0
+clip_grad = 1.0  # Reduced gradient clipping
 
 # trainer
 train = dict(
@@ -21,20 +21,22 @@ train = dict(
 
 # model settings
 model = dict(
-    type="DefaultSegmentor",  # Use default segmentor for single dataset
+    type="DefaultSegmentorV2",  # Use V2 to match base config
+    num_classes=2,  # Binary classification: keep (0) vs prune (1)
+    backbone_out_channels=64,  # Add this to match base config
     backbone=dict(
         type="PT-v3m1",
-        in_channels=9,  # coord (3) + color (3) + normal (3)
+        in_channels=6,  # coord (3) + color (3) + normal (3) - matching base config
         order=("z", "z-trans", "hilbert", "hilbert-trans"),
         stride=(2, 2, 2, 2),
-        enc_depths=(2, 2, 6, 2),  # Reduced depth for smaller dataset
-        enc_channels=(48, 96, 192, 384),  # Reduced channels
-        enc_num_head=(3, 6, 12, 24),
-        enc_patch_size=(1024, 1024, 1024, 1024),
-        dec_depths=(2, 2, 2),  # Reduced decoder depth
-        dec_channels=(48, 96, 192),
-        dec_num_head=(3, 6, 12),
-        dec_patch_size=(1024, 1024, 1024),
+        enc_depths=(2, 2, 2, 6, 2),  # 5 stages: len(stride) + 1
+        enc_channels=(32, 64, 128, 256, 512),  # 5 channels for 5 stages
+        enc_num_head=(2, 4, 8, 16, 32),  # 5 heads for 5 stages
+        enc_patch_size=(1024, 1024, 1024, 1024, 1024),  # 5 patch sizes
+        dec_depths=(2, 2, 2, 2),  # 4 decoder stages
+        dec_channels=(64, 64, 128, 256),  # 4 decoder channels
+        dec_num_head=(4, 4, 8, 16),  # 4 decoder heads
+        dec_patch_size=(1024, 1024, 1024, 1024),  # 4 decoder patch sizes
         mlp_ratio=4,
         qkv_bias=True,
         qk_scale=None,
@@ -48,10 +50,16 @@ model = dict(
         upcast_attention=False,
         upcast_softmax=False,
         cls_mode=False,
+        pdnorm_bn=False,
+        pdnorm_ln=False,
+        pdnorm_decouple=True,
+        pdnorm_adaptive=False,
+        pdnorm_affine=True,
+        pdnorm_conditions=("PeachTree",),  # Single condition for peach tree
     ),
     criteria=[
         dict(type="CrossEntropyLoss", loss_weight=1.0, ignore_index=-1),
-        dict(type="LovaszLoss", mode="multiclass", loss_weight=1.0, ignore_index=-1),
+        dict(type="LovaszLoss", mode="binary", loss_weight=1.0, ignore_index=-1),
     ],
     # fmt: off
     # class_name=(
@@ -325,3 +333,13 @@ data = dict(
         ),
     ),
 )
+
+# hooks - for loading pretrained weights with different number of classes
+hooks = [
+    dict(type="CheckpointLoader", strict=False),  # Allow loading pretrained weights with mismatched layer sizes
+    dict(type="IterationTimer", warmup_iter=2),
+    dict(type="InformationWriter"),
+    dict(type="SemSegEvaluator"),
+    dict(type="CheckpointSaver", save_freq=None),
+    dict(type="PreciseEvaluator", test_last=False),
+]

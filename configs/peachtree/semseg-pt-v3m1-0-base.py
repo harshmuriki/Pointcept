@@ -7,8 +7,8 @@ mix_prob = 0.8
 empty_cache = False
 enable_amp = True
 
-weight = 'exp/model_best.pth'
-resume = False
+# weight = 'exp/model_best.pth'
+# resume = False
 
 # model settings
 model = dict(
@@ -300,11 +300,11 @@ data = dict(
 )
 
 # hooks - for loading pretrained weights with different number of classes
-hooks = [
-    dict(type="CheckpointLoader", strict=False),  # Allow loading pretrained weights with mismatched layer sizes
-    dict(type="IterationTimer", warmup_iter=2),
-    dict(type="InformationWriter"),
-    dict(type="SemSegEvaluator"),
-    dict(type="CheckpointSaver", save_freq=None),
-    dict(type="PreciseEvaluator", test_last=False),
-]
+# hooks = [
+#     dict(type="CheckpointLoader", strict=False),  # Allow loading pretrained weights with mismatched layer sizes
+#     dict(type="IterationTimer", warmup_iter=2),
+#     dict(type="InformationWriter"),
+#     dict(type="SemSegEvaluator"),
+#     dict(type="CheckpointSaver", save_freq=None),
+#     dict(type="PreciseEvaluator", test_last=False),
+# ]

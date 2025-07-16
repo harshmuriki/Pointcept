@@ -5,6 +5,11 @@
 # python -m venv pointnet2
 # source pointnet2/bin/activate
 
+# To download miniconda
+# wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# conda env create -f environment.yml --verbose
+# conda activate pointcept-torch2.5.0-cu12.4
+
 # 2. Install PyTorch 2.6.0, torchvision 0.21.0, torchaudio 2.6.0 for CUDA 12.6
 pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
 
