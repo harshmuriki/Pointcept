@@ -173,12 +173,17 @@ class PeachTreeDataset(Dataset):
             color = color / 255.0
         color = np.clip(color, 0.0, 1.0)
         
-        # Ensure labels are 0 or 1
+        # Ensure labels are 0 or 1, then map to 36-class format for PPT compatibility
         unique_labels = np.unique(segment)
         if not all(label in [0, 1] for label in unique_labels):
             logger = get_root_logger()
             logger.warning(f"Invalid labels in {data_path}: {unique_labels}. Clipping to [0, 1]")
             segment = np.clip(segment, 0, 1)
+        
+        # Map binary labels to 36-class format for PPT model compatibility
+        # Keep classes 0 and 1 as they are, since they map directly to our binary segmentation
+        # The pretrained model expects 36 classes, but we only use 2 of them
+        # Classes 2-35 will never be predicted for our PeachTree data
         
         # Ensure tree types are 0 or 1
         unique_tree_types = np.unique(tree_type)
@@ -193,6 +198,7 @@ class PeachTreeDataset(Dataset):
             color=color,
             segment=segment,
             tree_type=tree_type,
+            condition="ScanNet",  # Use ScanNet condition for PPT model compatibility
         )
 
         
@@ -246,7 +252,7 @@ class PeachTreeDataset(Dataset):
         data_dict = dict(
             fragment_list=input_dict_list, segment=segment, name=self.get_data_name(idx)
         )
-        print("keys of data_dict:", data_dict.keys())
+        # print("keys of data_dict:", data_dict.keys())
         return data_dict
 
 
@@ -310,6 +316,7 @@ class PeachTree2Dataset(PeachTreeDataset):
             color=color,
             segment=segment,
             tree_type=tree_type,
+            condition="ScanNet",  # Use ScanNet condition for PPT model compatibility
         )
 
         return data_dict

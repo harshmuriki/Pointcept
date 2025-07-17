@@ -64,39 +64,21 @@ scheduler = dict(
 param_dicts = [dict(keyword="block", lr=0.0002)]
 
 # dataset settings
-dataset_type = "ScanNetDataset"
-data_root = "data/scannet"
+dataset_type = "PeachTreeDataset"
+data_root = "data/peachtreev3_2"
 
 data = dict(
-    num_classes=20,
+    num_classes=2,
     ignore_index=-1,
     names=[
-        "wall",
-        "floor",
-        "cabinet",
-        "bed",
-        "chair",
-        "sofa",
-        "table",
-        "door",
-        "window",
-        "bookshelf",
-        "picture",
-        "counter",
-        "desk",
-        "curtain",
-        "refridgerator",
-        "shower curtain",
-        "toilet",
-        "sink",
-        "bathtub",
-        "otherfurniture",
+        "keep",    # class 0: points to keep
+        "prune",   # class 1: points to prune
     ],
     train=dict(
         type=dataset_type,
         split="train",
         data_root=data_root,
-        lr_file="data/scannet/tasks/scenes/1.txt",
+        # lr_file="data/scannet/tasks/scenes/1.txt",
         transform=[
             dict(type="CenterShift", apply_z=True),
             dict(
@@ -164,7 +146,7 @@ data = dict(
     ),
     test=dict(
         type=dataset_type,
-        split="val",
+        split="test",
         data_root=data_root,
         transform=[
             dict(type="CenterShift", apply_z=True),
@@ -199,114 +181,114 @@ data = dict(
                         p=1,
                     )
                 ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    )
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    )
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[3 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    )
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[0],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[0.95, 0.95]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[0.95, 0.95]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[0.95, 0.95]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[3 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[0.95, 0.95]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[0],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[1.05, 1.05]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[1.05, 1.05]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[1],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[1.05, 1.05]),
-                ],
-                [
-                    dict(
-                        type="RandomRotateTargetAngle",
-                        angle=[3 / 2],
-                        axis="z",
-                        center=[0, 0, 0],
-                        p=1,
-                    ),
-                    dict(type="RandomScale", scale=[1.05, 1.05]),
-                ],
-                [dict(type="RandomFlip", p=1)],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     )
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     )
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[3 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     )
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[0],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[0.95, 0.95]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[0.95, 0.95]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[0.95, 0.95]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[3 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[0.95, 0.95]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[0],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[1.05, 1.05]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[1.05, 1.05]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[1],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[1.05, 1.05]),
+                # ],
+                # [
+                #     dict(
+                #         type="RandomRotateTargetAngle",
+                #         angle=[3 / 2],
+                #         axis="z",
+                #         center=[0, 0, 0],
+                #         p=1,
+                #     ),
+                #     dict(type="RandomScale", scale=[1.05, 1.05]),
+                # ],
+                # [dict(type="RandomFlip", p=1)],
             ],
         ),
     ),

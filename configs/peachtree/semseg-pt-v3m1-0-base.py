@@ -70,7 +70,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "PeachTreeDataset"
-data_root = "data/peachtreev3_5"
+data_root = "data/peachtreev3_1"
 
 data = dict(
     num_classes=2,

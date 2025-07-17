@@ -201,6 +201,9 @@ class SemSegTester(TesterBase):
                             torch.cuda.empty_cache()
                         bs = 0
                         for be in input_dict["offset"]:
+                            if pred.shape[1] != pred_part.shape[1]:
+                                pred_part = pred_part[:, :pred.shape[1]]
+                                print("Adjusted pred_part shape in test code:", pred_part.shape)
                             pred[idx_part[bs:be], :] += pred_part[bs:be]
                             bs = be
 

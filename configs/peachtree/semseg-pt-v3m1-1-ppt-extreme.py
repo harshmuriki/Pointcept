@@ -59,7 +59,7 @@ model = dict(
     ),
     criteria=[
         dict(type="CrossEntropyLoss", loss_weight=1.0, ignore_index=-1),
-        dict(type="LovaszLoss", mode="binary", loss_weight=1.0, ignore_index=-1),
+        dict(type="LovaszLoss", mode="multiclass", loss_weight=1.0, ignore_index=-1),
     ],
     # fmt: off
     # class_name=(
@@ -84,10 +84,9 @@ scheduler = dict(
     div_factor=10.0,
     final_div_factor=1000.0,
 )
-
 # dataset settings
 dataset_type = "PeachTreeDataset"
-data_root = "data/peachtreev3_1"
+data_root = "data/peachtreev3_2"
 
 data = dict(
     num_classes=2,
