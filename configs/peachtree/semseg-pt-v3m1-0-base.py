@@ -1,5 +1,5 @@
 _base_ = ["../_base_/default_runtime.py"]
-
+# sh scripts/train.sh -d peachtree -c semseg-pt-v3m1-0-base -n ptv3-datav3
 # misc custom setting
 batch_size = 8  # bs: total bs in all gpus (reduced for smaller dataset)
 num_worker = 16  # reduced workers for smaller dataset
@@ -70,7 +70,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "PeachTreeDataset"
-data_root = "data/peachtreev3"
+data_root = "data/peachtreev3_5"
 
 data = dict(
     num_classes=2,

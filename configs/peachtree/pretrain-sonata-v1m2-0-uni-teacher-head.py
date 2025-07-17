@@ -6,7 +6,7 @@ Dataset: PeachTree
 _base_ = ["../_base_/default_runtime.py"]
 
 # misc custom setting
-batch_size = 24  # bs: total bs in all gpus (reduced for smaller dataset)
+batch_size = 8  # bs: total bs in all gpus (reduced for smaller dataset)
 num_worker = 16
 mix_prob = 0
 clip_grad = 3.0
@@ -190,7 +190,7 @@ data = dict(
     train=dict(
         type="PeachTreeDataset",
         split=["train", "val"],  # Use train and val splits for pretraining
-        data_root="data/peachtreev3",
+        data_root="data/peachtreev3_1",
         transform=transform,
         test_mode=False,
         loop=10,  # Increase loop to compensate for smaller dataset

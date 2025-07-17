@@ -51,7 +51,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "PeachTreeDataset"  # Use custom peach tree dataset
-data_root = "data/peachtreev3"  # Use the standard scannet data path
+data_root = "data/peachtreev3_2"  # Use the standard scannet data path
 
 data = dict(
     num_classes=2,

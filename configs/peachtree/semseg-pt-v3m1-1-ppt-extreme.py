@@ -87,7 +87,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "PeachTreeDataset"
-data_root = "data/peachtreev3"
+data_root = "data/peachtreev3_1"
 
 data = dict(
     num_classes=2,
@@ -335,11 +335,11 @@ data = dict(
 )
 
 # hooks - for loading pretrained weights with different number of classes
-hooks = [
-    dict(type="CheckpointLoader", strict=False),  # Allow loading pretrained weights with mismatched layer sizes
-    dict(type="IterationTimer", warmup_iter=2),
-    dict(type="InformationWriter"),
-    dict(type="SemSegEvaluator"),
-    dict(type="CheckpointSaver", save_freq=None),
-    dict(type="PreciseEvaluator", test_last=False),
-]
+# hooks = [
+#     dict(type="CheckpointLoader", strict=False),  # Allow loading pretrained weights with mismatched layer sizes
+#     dict(type="IterationTimer", warmup_iter=2),
+#     dict(type="InformationWriter"),
+#     dict(type="SemSegEvaluator"),
+#     dict(type="CheckpointSaver", save_freq=None),
+#     dict(type="PreciseEvaluator", test_last=False),
+# ]
