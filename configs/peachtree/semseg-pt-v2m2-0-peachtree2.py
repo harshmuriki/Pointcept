@@ -38,7 +38,7 @@ model = dict(
 )
 
 # scheduler settings
-eval_epoch = epoch = 300  # Reduced epochs for smaller dataset
+eval_epoch = epoch = 100  # Reduced epochs for smaller dataset
 optimizer = dict(type="AdamW", lr=0.003, weight_decay=0.02)  # Slightly lower learning rate
 scheduler = dict(
     type="OneCycleLR",
@@ -51,7 +51,7 @@ scheduler = dict(
 
 # dataset settings
 dataset_type = "PeachTreeDataset"  # Use custom peach tree dataset
-data_root = "data/peachtreev3_2"  # Use the standard scannet data path
+data_root = "data/peachtreev3_5"  # Use the standard scannet data path
 
 data = dict(
     num_classes=2,
