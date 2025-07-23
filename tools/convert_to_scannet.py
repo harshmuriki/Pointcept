@@ -28,6 +28,9 @@ from tqdm import tqdm
 import json
 import re
 
+# [G, M, M, G, M, M]
+OUTLIERS = [23, 28, 77, 48, 42, 71]
+
 def load_ply_file(file_path):
     """Load PLY file and return coordinates and colors"""
     print(f"Loading {file_path}...")
@@ -177,8 +180,8 @@ def find_tree_pairs(data_dir):
     data_path = Path(data_dir)
     
     # Look for the specific directory structure
-    full_dir = data_path / 'fully_cleaned_pre_new'
-    pruned_dir = data_path / 'pruned_branches_filled_new'
+    full_dir = data_path / 'prepruned_data_skeleton'
+    pruned_dir = data_path / 'pruned_branches_filled_skeleton'
     
     if not full_dir.exists():
         print(f"Full tree directory not found: {full_dir}")
@@ -197,13 +200,12 @@ def find_tree_pairs(data_dir):
     
     # Match files by name
     pairs = []
-    # [G, M, M, G, M, M]
-    Outliers = [23, 28, 77, 48, 42, 71]
+
     for i, full_file in enumerate(full_files):
         pruned_branches = pruned_files[i] if i < len(pruned_files) else None
         # Skip outliers
         tree_id = int(full_file.name.split('_')[1].split('.')[0])
-        if tree_id in Outliers:
+        if tree_id in OUTLIERS:
             print(f"Skipping outlier index {i} tree_id {tree_id}: {full_file.name}")
             continue
         if pruned_branches and pruned_branches.exists():
@@ -245,6 +247,25 @@ def create_train_test_val_split(scenes, train_ratio=0.8, test_ratio=0.1, val_rat
     
     return train_scenes, test_scenes, val_scenes
 
+def create_train_val_test_split_predetermined(scenes, split_json_path):
+    """
+    Split scenes into train/test/val sets based on a predetermined split JSON file.
+
+    Args:
+        scenes: List of all scene names (e.g., ['tree_0001', 'tree_0002', ...])
+        split_json_path: Path to a JSON file in the dataset summary format, with 'scene_names' key.
+
+    Returns:
+        train_scenes, test_scenes, val_scenes: Lists of scene names for each split.
+    """
+    with open(split_json_path, 'r') as f:
+        split = json.load(f)
+    scene_names = split.get('scene_names', {})
+    train_scenes = [scene for scene in scene_names.get('train', []) if scene in scenes]
+    test_scenes = [scene for scene in scene_names.get('test', []) if scene in scenes]
+    val_scenes = [scene for scene in scene_names.get('val', []) if scene in scenes]
+    return train_scenes, test_scenes, val_scenes
+
 def determine_tree_type(tree_name, type_0_list):
     """
     Determine tree type based on whether the tree name is in a specified list.
@@ -272,11 +293,31 @@ def determine_tree_type(tree_name, type_0_list):
     
     return tree_type
 
-def main(i=None):
+
+def visualize_tree(tree_folder_path):
+    coordinates = np.load(tree_folder_path / 'coord.npy')
+    colors = np.load(tree_folder_path / 'color.npy')
+    normals = np.load(tree_folder_path / 'normal.npy')
+    labels = np.load(tree_folder_path / 'segment2.npy')
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(coordinates)
+    # pcd.colors = o3d.utility.Vector3dVector(colors)
+    pcd.normals = o3d.utility.Vector3dVector(normals)
+    # pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Default color
+    # Color points: red for pruned (label==1), green for keep (label==0)
+    color_map = np.zeros((len(labels), 3))
+    color_map[labels == 1] = [1.0, 0.0, 0.0]   # Red for pruned
+    color_map[labels == 0] = [0.0, 1.0, 0.0]   # Green for keep
+    pcd.colors = o3d.utility.Vector3dVector(color_map)
+    o3d.visualization.draw_geometries([pcd])
+
+
+def main(i=0):
     parser = argparse.ArgumentParser(description='Convert peach tree data to ScanNet format')
     parser.add_argument('--data_dir', type=str, default='/home/vmuriki3/Documents/transformer/peachtree-pruning-transformers/Final_data',
                        help='Directory containing PLY files')
-    parser.add_argument('--output_dir', type=str, default=f'peachtreev3_{i}',
+    parser.add_argument('--output_dir', type=str, default=f'peachtree_skeleton_{i}',
                        help='Output directory for ScanNet format data')
     parser.add_argument('--train_ratio', type=float, default=0.8,
                        help='Ratio of data to use for training')
@@ -284,21 +325,18 @@ def main(i=None):
                        help='Ratio of data to use for testing')
     parser.add_argument('--val_ratio', type=float, default=0.1,
                        help='Ratio of data to use for validation')
-    parser.add_argument('--type_0_file', type=str, default="type0_trees.txt",
+    parser.add_argument('--type_0_file', type=str, default="/home/vmuriki3/Documents/transformer/peachtree-pruning-transformers/type0_trees.txt",
                        help='File containing list of tree names (one per line) that should be classified as type 0')
-    
+    parser.add_argument('--split_json_path', type=str, default='/home/vmuriki3/Documents/transformer/peachtree-pruning-transformers/Final_data/peachtree_data/peachtreev3_5/dataset_summary.json',
+                       help='Path to a JSON file containing a predetermined train/val/test split. If provided, overrides train/test/val ratios.')
     args = parser.parse_args()
+    
     # Process type 0 list
     type_0_list = None
-    if args.type_0_file:
-        # Read from file
-        try:
-            with open(args.type_0_file, 'r') as f:
-                type_0_list = [line.strip() for line in f if line.strip()]
-                print("All type 0 trees: ", type_0_list)
-            print(f"Loaded {len(type_0_list)} tree names from {args.type_0_file}")
-        except FileNotFoundError:
-            print(f"Warning: Type 0 list file not found: {args.type_0_file}")
+    with open(args.type_0_file, 'r') as f:
+        type_0_list = [line.strip() for line in f if line.strip()]
+        print("All type 0 trees: ", type_0_list)
+    print(f"Loaded {len(type_0_list)} tree names from {args.type_0_file}")
     
     # Validate ratios
     if abs(args.train_ratio + args.test_ratio + args.val_ratio - 1.0) > 1e-6:
@@ -346,15 +384,24 @@ def main(i=None):
         print("No scenes were successfully processed!")
         return
     
-    # Create train/test/val split
-    train_scenes, test_scenes, val_scenes = create_train_test_val_split(
-        processed_scenes, 
-        args.train_ratio, 
-        args.test_ratio, 
-        args.val_ratio,
-        i=i
-    )
-    
+    if args.split_json_path:
+        print("%" * 60)
+        print(f"Using predetermined split from {args.split_json_path}")
+        train_scenes, test_scenes, val_scenes = create_train_val_test_split_predetermined(
+            processed_scenes,
+            split_json_path=args.split_json_path
+        )
+    else:
+        print(f"Creating train/test/val split with ratios: {args.train_ratio}, {args.test_ratio}, {args.val_ratio}")
+        # Create train/test/val split
+        train_scenes, test_scenes, val_scenes = create_train_test_val_split(
+            processed_scenes, 
+            args.train_ratio, 
+            args.test_ratio, 
+            args.val_ratio,
+            i=i
+        )
+
     print(f"\nCreating train/test/val split:")
     print(f"  Train scenes: {len(train_scenes)}")
     print(f"  Test scenes: {len(test_scenes)}")
@@ -448,6 +495,5 @@ def main(i=None):
     print(f"  Type 1: {type_1_count} trees")
 
 if __name__ == "__main__":
-    for i in range(1, 6):
-        print(f"Running conversion for peachtreev3_{i}...")
-        main(i=i)
+    main()
+    # visualize_tree(tree_folder_path=Path("/home/vmuriki3/Documents/transformer/peachtree-pruning-transformers/Pointcept/tools/peachtree_skeleton_0/tree_0001"))
